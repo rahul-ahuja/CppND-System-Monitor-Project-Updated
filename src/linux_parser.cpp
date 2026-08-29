@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+//#include <iostream>
+
 #include "linux_parser.h"
 
 using std::stof;
@@ -30,6 +32,7 @@ string LinuxParser::OperatingSystem() {
       }
     }
   }
+  //std::cout << "Value from OS: " << value;
   return value;
 }
 
