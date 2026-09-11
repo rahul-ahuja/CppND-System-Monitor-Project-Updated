@@ -8,7 +8,6 @@
 #include "linux_parser.h"
 
 using std::stof;
-using std::stoi;
 using std::string;
 using std::to_string;
 using std::vector;
@@ -70,11 +69,41 @@ vector<int> LinuxParser::Pids() {
   return pids;
 }
 
+int ProcessStats(std::string processKey, std::string FileName ) {
+    const string ProcStats =  LinuxParser::kProcDirectory + FileName;
+    string line, key, value;
+    std::ifstream filestream(ProcStats);
+    if (filestream.is_open()) {
+        while (std::getline(filestream, line)) {
+            std::istringstream linestream(line);
+              while (linestream >> key >> value) {
+                if (key == processKey) {
+                  return stoi(value);
+                }
+              }
+          }
+      }
+    return 0;
+}
+
 // TODO: Read and return the system memory utilization
 float LinuxParser::MemoryUtilization() { return 0.0; }
 
 // TODO: Read and return the system uptime
-long LinuxParser::UpTime() { return 0; }
+long LinuxParser::UpTime() {
+    const string ProcStats =  kProcDirectory + kUptimeFilename;
+    string line;
+    string first_value;
+    string second_value;
+    std::ifstream filestream(ProcStats);
+    if (filestream.is_open()) {
+        std::getline(filestream, line);
+        std::istringstream linestream(line);
+        linestream >> first_value >> second_value;
+        return stol(first_value);
+      }
+      return 0;
+}
 
 // TODO: Read and return the number of jiffies for the system
 long LinuxParser::Jiffies() { return 0; }
@@ -94,30 +123,15 @@ vector<string> LinuxParser::CpuUtilization() { return {}; }
 
 // TODO: Read and return the total number of processes
 int LinuxParser::TotalProcesses() {
-    const std::string kProcDirectory{"/proc/"};
-    const string kStatFilename{"/stat"};
-    const string ProcStats =  kProcDirectory + kStatFilename;
-    string line, key, value;
-    std::ifstream filestream(ProcStats);
-    if (filestream.is_open()) {
-        while (std::getline(filestream, line)) {
-            std::istringstream linestream(line);
-              while (linestream >> key >> value) {
-                if (key == "processes") {
-                  //std::cout << "key: " << key << endl;
-                  //std::cout << "Value: " << stof(value) << endl;
-                  return stoi(value);
-                }
-              }
-          }
-      }
+  return ProcessStats("processes", kStatFilename);
 }
 
+// TODO: Read and return the number of running processes
+int LinuxParser::RunningProcesses() {
+  return ProcessStats("procs_running", kStatFilename);
+}
 
 //{ return 0; }
-
-// TODO: Read and return the number of running processes
-int LinuxParser::RunningProcesses() { return 0; }
 
 // TODO: Read and return the command associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
