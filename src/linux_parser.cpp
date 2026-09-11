@@ -8,6 +8,7 @@
 #include "linux_parser.h"
 
 using std::stof;
+using std::stoi;
 using std::string;
 using std::to_string;
 using std::vector;
@@ -92,7 +93,28 @@ long LinuxParser::IdleJiffies() { return 0; }
 vector<string> LinuxParser::CpuUtilization() { return {}; }
 
 // TODO: Read and return the total number of processes
-int LinuxParser::TotalProcesses() { return 0; }
+int LinuxParser::TotalProcesses() {
+    const std::string kProcDirectory{"/proc/"};
+    const string kStatFilename{"/stat"};
+    const string ProcStats =  kProcDirectory + kStatFilename;
+    string line, key, value;
+    std::ifstream filestream(ProcStats);
+    if (filestream.is_open()) {
+        while (std::getline(filestream, line)) {
+            std::istringstream linestream(line);
+              while (linestream >> key >> value) {
+                if (key == "processes") {
+                  //std::cout << "key: " << key << endl;
+                  //std::cout << "Value: " << stof(value) << endl;
+                  return stoi(value);
+                }
+              }
+          }
+      }
+}
+
+
+//{ return 0; }
 
 // TODO: Read and return the number of running processes
 int LinuxParser::RunningProcesses() { return 0; }
